@@ -7,7 +7,7 @@ import feedparser
 import requests
 from git import Repo
 
-tuling_key = '0d5cea859c8446d790c70afb3e425f36'
+tuling_key = ''
 rss_urls = [
     'http://www.freebuf.com/feed', 'http://paper.seebug.org/rss/',
     'https://evi1cg.me/feed', 'http://www.91ri.org/feed'
@@ -36,6 +36,15 @@ def update_personal_kb(question, answer):
     payload["data"] = {}
     payload["data"]["list"] = kblist
     r = requests.post('http://www.tuling123.com/v1/kb/update', json=payload)
+
+
+def delete_personal_kb():
+    """ 删除图灵机器人语料库指定答案. """
+    payload = {}
+    payload["apikey"] = tuling_key
+    payload["timestamp"] = time.time()
+    payload["data"] = {"clear": False, "ids": [1110199]}
+    r = requests.post('http://www.tuling123.com/v1/kb/delete', json=payload)
 
 
 def select_personal_kb(question):
@@ -106,6 +115,19 @@ def write_markdown_file(news):
             os.mkdir(docs_path)
 
 
+def convert_feed_to_buffer(news):
+    """ . """
+    result = ""
+    if not news:
+        return "No feed news in last day."
+    else:
+        result = result + "Quick news\n\n"
+        for feed_new in news:
+            result = result + "#%s\n\n%s\n\n" % (feed_new['title'],
+                                                 feed_new['link'])
+    return result
+
+
 def git_daily_news():
     """ 提交md文件到远程仓库. """
     timestamp = time.time()
@@ -124,5 +146,7 @@ def git_daily_news():
 
 
 if __name__ == '__main__':
-    write_markdown_file(fetch_all_feeds())
+    news = fetch_all_feeds()
+    write_markdown_file(news)
+    update_personal_kb("每日播报", convert_feed_to_buffer(news))
     git_daily_news()
