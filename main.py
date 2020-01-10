@@ -7,7 +7,7 @@ import feedparser
 import requests
 from git import Repo
 
-tuling_key = ''
+tuling_key = '0d5cea859c8446d790c70afb3e425f36'
 rss_urls = [
     'http://www.freebuf.com/feed', 'http://paper.seebug.org/rss/',
     'https://evi1cg.me/feed', 'http://www.91ri.org/feed'
@@ -123,8 +123,8 @@ def convert_feed_to_buffer(news):
     else:
         result = result + "Quick news\n\n"
         for feed_new in news:
-            result = result + "#%s\n\n%s\n\n" % (feed_new['title'],
-                                                 feed_new['link'])
+            result = result + "# %s\n\n%s\n\n" % (feed_new['title'],
+                                                  feed_new['link'])
     return result
 
 
