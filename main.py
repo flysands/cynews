@@ -4,14 +4,53 @@ import os
 import time
 
 import feedparser
+import requests
 from git import Repo
 
+tuling_key = '0d5cea859c8446d790c70afb3e425f36'
 rss_urls = [
     'http://www.freebuf.com/feed', 'http://paper.seebug.org/rss/',
     'https://evi1cg.me/feed', 'http://www.91ri.org/feed'
 ]
 
-repo_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+repo_path = os.path.dirname(os.path.realpath(__file__))
+
+
+def add_personal_kb(question, answer):
+    """ 新增图灵机器人语料库. """
+    kblist = [{"question": question, "answer": answer}]
+    payload = {}
+    payload["apikey"] = tuling_key
+    payload["timestamp"] = time.time()
+    payload["data"] = {}
+    payload["data"]["list"] = kblist
+    r = requests.post('http://www.tuling123.com/v1/kb/import', json=payload)
+
+
+def update_personal_kb(question, answer):
+    """ 更新图灵机器人语料库. """
+    kblist = [{"question": question, "answer": answer, "id": "1110195"}]
+    payload = {}
+    payload["apikey"] = tuling_key
+    payload["timestamp"] = time.time()
+    payload["data"] = {}
+    payload["data"]["list"] = kblist
+    r = requests.post('http://www.tuling123.com/v1/kb/update', json=payload)
+
+
+def select_personal_kb(question):
+    """ 查询图灵机器人语料库. """
+    payload = {}
+    payload["apikey"] = tuling_key
+    payload["timestamp"] = time.time()
+    payload["data"] = {
+        "pages": {
+            "pageNumber": 1,
+            "pageSize": 10,
+            "searchBy": question
+        }
+    }
+    r = requests.post('http://www.tuling123.com/v1/kb/select', json=payload)
 
 
 def get_feeds_lastday_published(rss_url):
@@ -55,7 +94,7 @@ def write_markdown_file(news):
             os.path.dirname(os.path.realpath(__file__)), "docs", current_year)
         if os.path.exists(docs_path):
             md_file = codecs.open(
-                os.path.join(docs_path, file_name), 'wa', 'utf-8')
+                os.path.join(docs_path, file_name), 'w', 'utf-8')
             md_file.write(u"# Quick news\n\n")
             for feed_new in news:
                 md_file.write("## %s\n\n%s\n\n" % (feed_new['title'],
