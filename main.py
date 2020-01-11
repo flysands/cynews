@@ -116,7 +116,7 @@ def write_markdown_file(news):
 
 
 def convert_feed_to_buffer(news):
-    """ . """
+    """ 转化为buffer. """
     result = ""
     limit = 512
     if not news:
@@ -126,14 +126,27 @@ def convert_feed_to_buffer(news):
         index = 1
         for feed_new in news:
             cur_len = len(result)
-            append_str = "%d. %s\n%s\n" % (index, feed_new['title'],
-                                           feed_new['link'])
+            append_str = "%d. %s\n%s\n" % (
+                index, feed_new['title'],
+                convert_to_short_link(feed_new['link']))
             if cur_len + len(append_str) <= limit:
                 result = result + append_str
             else:
                 break
             index = index + 1
     return result
+
+
+def convert_to_short_link(org_link):
+    """ 转化为短连接. """
+    short_link = org_link
+    max_try = 3
+    while short_link == org_link and max_try > 0:
+        max_try = max_try - 1
+        r = requests.get('http://muzidwz.cn/sina_short.php?data=' + org_link)
+        if (r.status_code == 200):
+            short_link = r.text
+    return short_link
 
 
 def git_daily_news():
