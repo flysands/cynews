@@ -118,14 +118,20 @@ def write_markdown_file(news):
 def convert_feed_to_buffer(news):
     """ . """
     result = ""
+    limit = 512
     if not news:
         return "No feed news in last day."
     else:
         result = result + "Quick news\n"
         index = 1
         for feed_new in news:
-            result = result + "%d.%s\n%s\n" % (index, feed_new['title'],
-                                               feed_new['link'])
+            cur_len = len(result)
+            append_str = "%d. %s\n%s\n" % (index, feed_new['title'],
+                                           feed_new['link'])
+            if cur_len + len(append_str) <= limit:
+                result = result + append_str
+            else:
+                break
             index = index + 1
     return result
 
