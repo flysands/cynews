@@ -121,10 +121,12 @@ def convert_feed_to_buffer(news):
     if not news:
         return "No feed news in last day."
     else:
-        result = result + "Quick news\n\n"
+        result = result + "Quick news\n"
+        index = 1
         for feed_new in news:
-            result = result + "# %s\n\n%s\n\n" % (feed_new['title'],
-                                                  feed_new['link'])
+            result = result + "%d.%s\n%s\n" % (index, feed_new['title'],
+                                               feed_new['link'])
+            index = index + 1
     return result
 
 
