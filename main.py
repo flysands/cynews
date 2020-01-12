@@ -183,7 +183,7 @@ def git_daily_news():
 
 
 if __name__ == '__main__':
-    parse_config("~/cynews.json")
+    parse_config("/home/pi/cynews.json")
     news = fetch_all_feeds()
     write_markdown_file(news)
     update_personal_kb("每日播报", convert_feed_to_buffer(news))
