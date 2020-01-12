@@ -10,7 +10,8 @@ from git import Repo
 
 rss_urls = [
     'http://www.freebuf.com/feed', 'http://paper.seebug.org/rss/',
-    'https://evi1cg.me/feed', 'http://www.91ri.org/feed'
+    'https://evi1cg.me/feed', 'http://www.91ri.org/feed',
+    'https://xz.aliyun.com/feed'
 ]
 tuling_key = ""
 short_url_token = ""
