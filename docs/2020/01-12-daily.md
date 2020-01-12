@@ -20,3 +20,11 @@ https://www.freebuf.com/news/225095.html
 
 https://www.freebuf.com/articles/others-articles/224051.html
 
+## Struts2框架从请求到Action——反射机制研究
+
+http://xz.aliyun.com/t/7076
+
+## 某Center v3.3.4 从前台反序列化任意SQL语句执行到前台RCE
+
+http://xz.aliyun.com/t/7077
+
