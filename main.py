@@ -1,5 +1,6 @@
 # coding=utf-8
 import codecs
+import json
 import os
 import time
 
@@ -7,13 +8,22 @@ import feedparser
 import requests
 from git import Repo
 
-tuling_key = '0d5cea859c8446d790c70afb3e425f36'
 rss_urls = [
     'http://www.freebuf.com/feed', 'http://paper.seebug.org/rss/',
     'https://evi1cg.me/feed', 'http://www.91ri.org/feed'
 ]
-
+tuling_key = ""
+short_url_token = ""
 repo_path = os.path.dirname(os.path.realpath(__file__))
+
+
+def parse_config(config_path):
+    """ 解析配置文件 """
+    json_dict = json.load(open(config_path))
+    global tuling_key
+    global short_url_token
+    tuling_key, short_url_token = json_dict["tuling_key"], json_dict[
+        "short_url_token"]
 
 
 def add_personal_kb(question, answer):
@@ -139,13 +149,19 @@ def convert_feed_to_buffer(news):
 
 def convert_to_short_link(org_link):
     """ 转化为短连接. """
+    payload = {"Url": org_link}
+    headers = {"Token": short_url_token}
     short_link = org_link
+    print(payload)
     max_try = 3
     while short_link == org_link and max_try > 0:
         max_try = max_try - 1
-        r = requests.get('http://muzidwz.cn/sina_short.php?data=' + org_link)
+        r = requests.post(
+            'https://dwz.cn/admin/v2/create', json=payload, headers=headers)
         if (r.status_code == 200):
-            short_link = r.text
+            result = r.json()
+            if result["Code"] == 0:
+                short_link = result["ShortUrl"]
     return short_link
 
 
@@ -167,6 +183,7 @@ def git_daily_news():
 
 
 if __name__ == '__main__':
+    parse_config("~/cynews.json")
     news = fetch_all_feeds()
     write_markdown_file(news)
     update_personal_kb("每日播报", convert_feed_to_buffer(news))
