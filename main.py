@@ -1,5 +1,6 @@
 # coding=utf-8
 import codecs
+import datetime
 import json
 import os
 import time
@@ -16,6 +17,8 @@ rss_urls = [
 tuling_key = ""
 short_url_token = ""
 repo_path = os.path.dirname(os.path.realpath(__file__))
+day = 86400
+week = day * 5
 
 
 def parse_config(config_path):
@@ -73,10 +76,10 @@ def select_personal_kb(question):
     r = requests.post('http://www.tuling123.com/v1/kb/select', json=payload)
 
 
-def get_feeds_lastday_published(rss_url):
+def get_feeds_published_with_time(rss_url, timeins=86400):
     """ 获取订阅内容. """
     lastday_published_news = []
-    timestamp = time.time() - 86400
+    timestamp = time.time() - timeins
     time_tuple = time.localtime(timestamp)
     time_str = time.strftime("%Y-%m-%d", time_tuple)
     feeds = feedparser.parse(rss_url)
@@ -96,12 +99,12 @@ def fetch_all_feeds():
     """ 遍历rss_url,获取所有订阅. """
     lastday_news = []
     for url in rss_urls:
-        single_news = get_feeds_lastday_published(url)
+        single_news = get_feeds_published_with_time(url)
         lastday_news.extend(single_news)
     return lastday_news
 
 
-def write_markdown_file(news):
+def write_markdown_file(news, is_weekly=False):
     """ 把订阅消息写入markdown格式的文件中. """
     if not news:
         print("No feed news in last day.")
@@ -110,6 +113,8 @@ def write_markdown_file(news):
         time_tuple = time.localtime(timestamp)
         current_year = time.strftime("%Y")
         file_name = time.strftime("%m-%d-daily.md", time_tuple)
+        if is_weekly:
+            file_name = file_name.replace("daily", "weekly")
         docs_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "docs", current_year)
         if os.path.exists(docs_path):
@@ -166,7 +171,7 @@ def convert_to_short_link(org_link):
     return short_link
 
 
-def git_daily_news():
+def git_push_news(with_weekly):
     """ 提交md文件到远程仓库. """
     timestamp = time.time()
     time_tuple = time.localtime(timestamp)
@@ -177,10 +182,24 @@ def git_daily_news():
     index = repo.index
     push_file_name = os.path.join("docs", current_year, file_name)
     print(push_file_name)
-    index.add([push_file_name])
+    if with_weekly:
+        print(push_file_name.replace("daily", "weekly"))
+        index.add([push_file_name, push_file_name.replace("daily", "weekly")])
+    else:
+        index.add([push_file_name])
     index.commit(commit_tag)
     remote = repo.remote()
     remote.push()
+
+
+def fetch_weekly_news():
+    """生成每周播报文件"""
+    lastweek_news = []
+    return
+    for url in rss_urls:
+        single_news = get_feeds_published_with_time(url, timeins=week)
+        lastweek_news.extend(single_news)
+    return lastweek_news
 
 
 if __name__ == '__main__':
@@ -188,4 +207,11 @@ if __name__ == '__main__':
     news = fetch_all_feeds()
     write_markdown_file(news)
     update_personal_kb("每日播报", convert_feed_to_buffer(news))
-    git_daily_news()
+    dtime = datetime.datetime.now()
+    day = dtime.weekday()
+    git_with_weekly = False
+    if day == 6:
+        news = fetch_weekly_news()
+        write_markdown_file(news, True)
+        git_with_weekly = True
+    git_push_news(git_with_weekly)
