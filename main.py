@@ -159,6 +159,7 @@ def convert_to_short_link(org_link):
         max_try = max_try - 1
         r = requests.post(
             'https://dwz.cn/admin/v2/create', json=payload, headers=headers)
+        print(r.text)
         if (r.status_code == 200):
             result = r.json()
             if result["Code"] == 0:
