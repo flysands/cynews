@@ -150,7 +150,7 @@ def convert_feed_to_buffer(news):
             else:
                 break
             index = index + 1
-    return result
+    return result.replace(" | ", " ：")
 
 
 def convert_to_short_link(org_link):
